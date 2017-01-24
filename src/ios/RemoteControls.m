@@ -23,7 +23,9 @@ static RemoteControls *remoteControls = nil;
 
 - (void)updateMetas:(CDVInvokedUrlCommand*)command
 {
-    [self.webView stringByEvaluatingJavaScriptFromString:@"Alert(\"h3h3\")"];
+    
+    
+  
 }
 
 
