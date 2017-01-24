@@ -28,8 +28,6 @@ static NSNumber *currentDuration = 0;
     NSNumber *duration = 20;
     NSNumber *elapsed = 10;
     NSNumber *pause = 0;
-    currenttrackid = "dasdasd";
-    currenttracksrc = "dasdad";
     if(artist != nil){
         currentartitst = artist;
     }
