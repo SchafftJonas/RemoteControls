@@ -15,7 +15,7 @@ static RemoteControls *remoteControls = nil;
 
 - (void)pluginInitialize
 {
-    NSLog(@"RemoteControls plugin init. !!!!123");
+    NSLog(@"RemoteControls plugin init. !!!!");
    /* [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveRemoteEvent:) name:@"receivedEvent" object:nil]; */
 
@@ -32,15 +32,10 @@ static RemoteControls *remoteControls = nil;
     NSNumber *duration = [command.arguments objectAtIndex:4];
     NSNumber *elapsed = [command.arguments objectAtIndex:5];
 
-    NSLog(@"2");
-    
     // async cover loading
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         UIImage *image = nil;
         // check whether cover path is present
-        
-        NSLog(@"3");
-        
         if (![cover isEqual: @""]) {
             // cover is remote file
             if ([cover hasPrefix: @"http://"] || [cover hasPrefix: @"https://"]) {
@@ -56,9 +51,6 @@ static RemoteControls *remoteControls = nil;
                     image = [[UIImage alloc] initWithContentsOfFile:fullPath];
                 }
             }
-            
-            NSLog(@"4");
-            
             // cover is relative path to local file
             else {
                 NSString *basePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -73,9 +65,6 @@ static RemoteControls *remoteControls = nil;
             // default named "no-image"
             image = [UIImage imageNamed:@"no-image"];
         }
-        
-        NSLog(@"5");
-        
         // check whether image is loaded
         CGImageRef cgref = [image CGImage];
         CIImage *cim = [image CIImage];
