@@ -9,8 +9,6 @@
 
 +(RemoteControls*)remoteControls;
 
-- (void)clearMediaControlMetas:(CDVInvokedUrlCommand*)command;
 - (void)updateMetas:(CDVInvokedUrlCommand*)command;
-- (void)receiveRemoteEvent:(UIEvent *)receivedEvent withController:(CDVViewController*)cdvViewController;
 
 @end

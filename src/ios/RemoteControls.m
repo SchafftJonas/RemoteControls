@@ -1,6 +1,5 @@
 
 #import "RemoteControls.h"
-#import "WLAppDelegate.h"
 
 @implementation RemoteControls
 static RemoteControls *remoteControls = nil;
@@ -16,40 +15,6 @@ static NSNumber *currentDuration = 0;
 - (void)pluginInitialize
 {
     NSLog(@"RemoteControls plugin init.");
-}
-
--(void)clearMediaControlMetas:(CDVInvokedUrlCommand*)command{
-    
-    MPRemoteCommandCenter * cc = [MPRemoteCommandCenter sharedCommandCenter];
-    
-    [cc.nextTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        return MPRemoteCommandHandlerStatusNoSuchContent;
-    }];
-    
-    [cc.previousTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        return MPRemoteCommandHandlerStatusNoSuchContent;
-    }];
-    
-    [cc.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        return MPRemoteCommandHandlerStatusNoSuchContent;
-    }];
-    
-    [cc.pauseCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
-        return MPRemoteCommandHandlerStatusNoSuchContent;
-    }];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        
-        if ([MPNowPlayingInfoCenter class])  {
-            
-            NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:@"R&S Podcast", nil]
-                                                                                  forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyTitle,nil]];
-            [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = currentlyPlayingTrackInfo;
-        }
-        
-    });
-    
-    
 }
 
 - (void)updateMetas:(CDVInvokedUrlCommand*)command
@@ -145,84 +110,6 @@ static NSNumber *currentDuration = 0;
     
 }
 
-
-- (void)receiveRemoteEvent:(UIEvent *)receivedEvent withController:(CDVViewController*)cdvViewController{
-    
-    if (receivedEvent.type == UIEventTypeRemoteControl) {
-        
-        NSString *subtype = @"other";
-        
-        
-        switch (receivedEvent.subtype) {
-                
-            case UIEventSubtypeRemoteControlTogglePlayPause:{
-                NSLog(@"playpause clicked.");
-                subtype = @"playpause";
-                
-                //   NSString *jsCode = [NSString stringWithFormat:@"$(\"#playPauseButton\").click();"];
-                
-                //   [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
-                
-                break;
-            }
-            case UIEventSubtypeRemoteControlPlay:{
-                NSLog(@"play clicked.");
-                subtype = @"play";
-                
-                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){ console.log('playAudio#####'); $(\"#playButton\").click(); }"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
-                
-                NSString *jsCode2 = [NSString stringWithFormat:@"if(mediaType == \"text\"){ console.log('playMedia#####'); $(\"#htmlviewerAudioBarPlay\").click(); }"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode2];
-                
-                break;
-            }
-            case UIEventSubtypeRemoteControlPause:{
-                NSLog(@"nowplaying pause clicked.");
-                subtype = @"pause";
-                
-                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){ console.log('pauseAudio#####'); $(\"#pauseButton\").click(); }"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
-                
-                NSString *jsCode2 = [NSString stringWithFormat:@"if(mediaType == \"text\"){ console.log('pauseMedia#####'); $(\"#htmlviewerAudioBarPause\").click(); }"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode2];
-                
-                break;
-            }
-            case UIEventSubtypeRemoteControlPreviousTrack:{
-                //[self previousTrack: nil];
-                NSLog(@"prev clicked.");
-                subtype = @"prevTrack";
-                
-                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){$(\"#prevButton\").click();}"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
-                
-                break;
-                
-            }
-                
-            case UIEventSubtypeRemoteControlNextTrack:{
-                NSLog(@"next clicked.");
-                subtype = @"nextTrack";
-                
-                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){$(\"#nextButton\").click();}"];
-                
-                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
-                
-                break;
-            }
-            default:
-                break;
-        }
-        
-        
-    }
-}
 
 +(RemoteControls *)remoteControls
 {
