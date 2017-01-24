@@ -1,152 +1,239 @@
-//
-// RemoteControls.m
-// Now Playing Cordova Plugin
-//
-// Created by François LASSERRE on 12/05/13.
-// Copyright 2013 François LASSERRE. All rights reserved.
-// MIT Licensed
-//
 
 #import "RemoteControls.h"
+#import "WLAppDelegate.h"
 
 @implementation RemoteControls
-
 static RemoteControls *remoteControls = nil;
+
+static NSString *currenttrackid = @"missing";
+static NSString *currenttracksrc = @"missing";
+static NSString *currenttitle = @"missing";
+static NSString *currentartitst = @"missing";
+static NSString *currentalbum = @"missing";
+static NSNumber *currentDuration = 0;
+
 
 - (void)pluginInitialize
 {
-    NSLog(@"RemoteControls plugin init. !!!!");
-   /* [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveRemoteEvent:) name:@"receivedEvent" object:nil]; */
+    NSLog(@"RemoteControls plugin init.");
+}
 
+-(void)clearMediaControlMetas:(CDVInvokedUrlCommand*)command{
+    
+    MPRemoteCommandCenter * cc = [MPRemoteCommandCenter sharedCommandCenter];
+    
+    [cc.nextTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusNoSuchContent;
+    }];
+    
+    [cc.previousTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusNoSuchContent;
+    }];
+    
+    [cc.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusNoSuchContent;
+    }];
+    
+    [cc.pauseCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusNoSuchContent;
+    }];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        
+        if ([MPNowPlayingInfoCenter class])  {
+            
+            NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:@"R&S Podcast", nil]
+                                                                                  forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyTitle,nil]];
+            [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = currentlyPlayingTrackInfo;
+        }
+        
+    });
+    
+    
 }
 
 - (void)updateMetas:(CDVInvokedUrlCommand*)command
 {
-    NSLog(@"1");
     
     NSString *artist = [command.arguments objectAtIndex:0];
     NSString *title = [command.arguments objectAtIndex:1];
     NSString *album = [command.arguments objectAtIndex:2];
-    NSString *cover = [command.arguments objectAtIndex:3];
     NSNumber *duration = [command.arguments objectAtIndex:4];
     NSNumber *elapsed = [command.arguments objectAtIndex:5];
-
-    // async cover loading
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        UIImage *image = nil;
-        // check whether cover path is present
-        if (![cover isEqual: @""]) {
-            // cover is remote file
-            if ([cover hasPrefix: @"http://"] || [cover hasPrefix: @"https://"]) {
-                NSURL *imageURL = [NSURL URLWithString:cover];
-                NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
-                image = [UIImage imageWithData:imageData];
-            }
-            // cover is full path to local file
-            else if ([cover hasPrefix: @"file://"]) {
-                NSString *fullPath = [cover stringByReplacingOccurrencesOfString:@"file://" withString:@""];
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
-                if (fileExists) {
-                    image = [[UIImage alloc] initWithContentsOfFile:fullPath];
-                }
-            }
-            // cover is relative path to local file
-            else {
-                NSString *basePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-                NSString *fullPath = [NSString stringWithFormat:@"%@%@", basePath, cover];
-                BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:fullPath];
-                if (fileExists) {
-                    image = [UIImage imageNamed:fullPath];
-                }
-            }
+    NSNumber *pause = [command.arguments objectAtIndex:8];
+    currenttrackid = [command.arguments objectAtIndex:6];
+    currenttracksrc = [command.arguments objectAtIndex:7];
+    if(artist != nil){
+        currentartitst = artist;
+    }
+    if(album != nil){
+        currentalbum = album;
+    }
+    currentDuration = duration;
+    if(title != nil){
+        currenttitle = title;
+    }
+    
+    // NSNumber *sum = [NSNumber numberWithFloat:((1 + [duration floatValue]) - [elapsed floatValue])];
+    
+    NSInteger *numb = 1;
+    
+    if([pause integerValue] == 1){
+        numb = 0;
+    }
+    
+    NSLog(@"######## ################################# ########");
+    
+    NSLog(@"######## Update Remote Audio Data Controls ########");
+    
+    NSLog(@"######## Artist: %@", currentartitst);
+    
+    NSLog(@"######## Title: %@", currenttitle);
+    
+    NSLog(@"######## Duration: %@", duration);
+    
+    NSLog(@"######## Elapsed Time: %@", elapsed);
+    
+    NSLog(@"######## isNotPause?: %zd", numb);
+    
+    NSLog(@"######## End Update Remote Audio Data Controls ########");
+    
+    NSLog(@"######## ################################# ########");
+    
+    // Wir stellen sicher dass alle benötigten Buttons nicht von Cordova überschrieben wurden:
+    
+    MPRemoteCommandCenter * cc = [MPRemoteCommandCenter sharedCommandCenter];
+    
+    [cc.nextTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+    
+    [cc.previousTrackCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+    
+    [cc.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+    
+    [cc.pauseCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent * _Nonnull event) {
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+    
+    // Update der Media Controls:
+    
+    if ([MPNowPlayingInfoCenter class])  {
+        
+        NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:currentartitst,currenttitle,duration,[NSNumber numberWithInteger:numb],elapsed, nil]
+                                                                              forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyArtist,MPMediaItemPropertyTitle, MPMediaItemPropertyPlaybackDuration,MPNowPlayingInfoPropertyPlaybackRate,             MPNowPlayingInfoPropertyElapsedPlaybackTime,nil]];
+        [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = currentlyPlayingTrackInfo;
+    }
+    
+    // Update der Media Controls mit einer leichten Verzögerung um alle evtl. auftretenden Änderungen von Cordova Plugins zu überschrieben:
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        
+        if ([MPNowPlayingInfoCenter class])  {
+            
+            NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:currentartitst,currenttitle,duration,[NSNumber numberWithInteger:numb],elapsed, nil]
+                                                                                  forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyArtist,MPMediaItemPropertyTitle, MPMediaItemPropertyPlaybackDuration,MPNowPlayingInfoPropertyPlaybackRate,             MPNowPlayingInfoPropertyElapsedPlaybackTime,nil]];
+            [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = currentlyPlayingTrackInfo;
         }
-        else {
-            // default named "no-image"
-            image = [UIImage imageNamed:@"no-image"];
-        }
-        // check whether image is loaded
-        CGImageRef cgref = [image CGImage];
-        CIImage *cim = [image CIImage];
-        if (cim != nil || cgref != NULL) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if (NSClassFromString(@"MPNowPlayingInfoCenter")) {
-                    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage: image];
-                    MPNowPlayingInfoCenter *center = [MPNowPlayingInfoCenter defaultCenter];
-                    center.nowPlayingInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                        artist, MPMediaItemPropertyArtist,
-                        title, MPMediaItemPropertyTitle,
-                        album, MPMediaItemPropertyAlbumTitle,
-                        artwork, MPMediaItemPropertyArtwork,
-                        duration, MPMediaItemPropertyPlaybackDuration,
-                        elapsed, MPNowPlayingInfoPropertyElapsedPlaybackTime,
-                        [NSNumber numberWithInt:1], MPNowPlayingInfoPropertyPlaybackRate, nil];
-                }
-            });
-        }
+        
     });
+    
+    
 }
 
 
-- (void)receiveRemoteEvent:(NSNotification *)notification {
+- (void)receiveRemoteEvent:(UIEvent *)receivedEvent withController:(CDVViewController*)cdvViewController{
     
-    UIEvent * receivedEvent = notification.object;
-
     if (receivedEvent.type == UIEventTypeRemoteControl) {
-
+        
         NSString *subtype = @"other";
-
+        
+        
         switch (receivedEvent.subtype) {
-
-            case UIEventSubtypeRemoteControlTogglePlayPause:
+                
+            case UIEventSubtypeRemoteControlTogglePlayPause:{
                 NSLog(@"playpause clicked.");
                 subtype = @"playpause";
+                
+                //   NSString *jsCode = [NSString stringWithFormat:@"$(\"#playPauseButton\").click();"];
+                
+                //   [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
+                
                 break;
-
-            case UIEventSubtypeRemoteControlPlay:
+            }
+            case UIEventSubtypeRemoteControlPlay:{
                 NSLog(@"play clicked.");
                 subtype = @"play";
+                
+                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){ console.log('playAudio#####'); $(\"#playButton\").click(); }"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
+                
+                NSString *jsCode2 = [NSString stringWithFormat:@"if(mediaType == \"text\"){ console.log('playMedia#####'); $(\"#htmlviewerAudioBarPlay\").click(); }"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode2];
+                
                 break;
-
-            case UIEventSubtypeRemoteControlPause:
+            }
+            case UIEventSubtypeRemoteControlPause:{
                 NSLog(@"nowplaying pause clicked.");
                 subtype = @"pause";
+                
+                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){ console.log('pauseAudio#####'); $(\"#pauseButton\").click(); }"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
+                
+                NSString *jsCode2 = [NSString stringWithFormat:@"if(mediaType == \"text\"){ console.log('pauseMedia#####'); $(\"#htmlviewerAudioBarPause\").click(); }"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode2];
+                
                 break;
-
-            case UIEventSubtypeRemoteControlPreviousTrack:
+            }
+            case UIEventSubtypeRemoteControlPreviousTrack:{
                 //[self previousTrack: nil];
                 NSLog(@"prev clicked.");
                 subtype = @"prevTrack";
+                
+                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){$(\"#prevButton\").click();}"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
+                
                 break;
-
-            case UIEventSubtypeRemoteControlNextTrack:
+                
+            }
+                
+            case UIEventSubtypeRemoteControlNextTrack:{
                 NSLog(@"next clicked.");
                 subtype = @"nextTrack";
-                //[self nextTrack: nil];
+                
+                NSString *jsCode = [NSString stringWithFormat:@"if(mediaType == \"audio\"){$(\"#nextButton\").click();}"];
+                
+                [cdvViewController.webView stringByEvaluatingJavaScriptFromString:jsCode];
+                
                 break;
-
+            }
             default:
                 break;
         }
-
-        NSDictionary *dict = @{@"subtype": subtype};
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options: 0 error: nil];
-        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        NSString *jsStatement = [NSString stringWithFormat:@"if(window.remoteControls)remoteControls.receiveRemoteEvent(%@);", jsonString];
-
-#ifdef __CORDOVA_4_0_0
-        [self.webViewEngine evaluateJavaScript:jsStatement completionHandler:nil];
-#else
-        [self.webView stringByEvaluatingJavaScriptFromString:jsStatement];
-#endif
+        
         
     }
 }
 
-
--(void)dealloc {
-    [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"receivedEvent" object:nil];
++(RemoteControls *)remoteControls
+{
+    
+    if (!remoteControls)
+    {
+        remoteControls = [[RemoteControls alloc] init];
+    }
+    
+    return remoteControls;
 }
+
 
 @end
