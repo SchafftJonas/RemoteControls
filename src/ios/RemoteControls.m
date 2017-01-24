@@ -24,9 +24,15 @@ static RemoteControls *remoteControls = nil;
 - (void)updateMetas:(CDVInvokedUrlCommand*)command
 {
     
-       NSString *jsStatement = [NSString stringWithFormat:@"Alert(\"h3h3\")"];
+    NSString *jsStatement = [NSString stringWithFormat:@"Alert(\"h3h3\");"];
     
+#ifdef __CORDOVA_4_0_0
+    [self.webViewEngine evaluateJavaScript:jsStatement completionHandler:nil];
+#else
     [self.webView stringByEvaluatingJavaScriptFromString:jsStatement];
+#endif
+    
+    
 }
 
 
