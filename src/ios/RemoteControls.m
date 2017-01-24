@@ -14,20 +14,20 @@ static NSNumber *currentDuration = 0;
 
 - (void)pluginInitialize
 {
-    NSLog(@"RemoteControls plugin init. 1");
+    NSLog(@"RemoteControls plugin init.");
 }
 
 - (void)updateMetas:(CDVInvokedUrlCommand*)command
 {
     
-    NSLog(@"GO. 1");
-    
-    NSString *artist = "dsadaD";
-    NSString *title = "dsadasd";
-    NSString *album = "dasdasd";
-    NSNumber *duration = 20;
-    NSNumber *elapsed = 10;
+    NSString *artist = [command.arguments objectAtIndex:0];
+    NSString *title = [command.arguments objectAtIndex:1];
+    NSString *album = [command.arguments objectAtIndex:2];
+    NSNumber *duration = [command.arguments objectAtIndex:4];
+    NSNumber *elapsed = [command.arguments objectAtIndex:5];
     NSNumber *pause = 0;
+    currenttrackid = [command.arguments objectAtIndex:1];
+    currenttracksrc = [command.arguments objectAtIndex:0];
     if(artist != nil){
         currentartitst = artist;
     }
