@@ -15,9 +15,8 @@ static RemoteControls *remoteControls = nil;
 
 - (void)pluginInitialize
 {
-    NSLog(@"RemoteControls plugin init.");
-    [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveRemoteEvent:) name:@"receivedEvent" object:nil];
+    NSLog(@"RemoteControls plugin init 1 2 3");
+   
 
 }
 
