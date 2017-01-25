@@ -14,7 +14,7 @@ static NSNumber *currentDuration = 0;
 
 - (void)pluginInitialize
 {
-    NSLog(@"RemoteControls plugin init.");
+    NSLog(@"RemoteControls plugin init. 11");
     
     
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
@@ -151,6 +151,8 @@ static NSNumber *currentDuration = 0;
 
 
 - (void)receiveRemoteEvent:(UIEvent *)receivedEvent withController:(CDVViewController*)cdvViewController{
+    
+    NSLog(@"GOT EVENT");
     
     if (receivedEvent.type == UIEventTypeRemoteControl) {
         
