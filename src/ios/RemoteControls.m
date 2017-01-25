@@ -81,6 +81,8 @@ static NSNumber *currentDuration = 0;
         numb = 0;
     }
     
+    MPMediaItemArtwork * mediaItemArtwork = [self createCoverArtwork:currenttracksrc];
+    
     NSLog(@"######## ################################# ########");
     
     NSLog(@"######## Update Remote Audio Data Controls ########");
@@ -123,8 +125,8 @@ static NSNumber *currentDuration = 0;
     
     if ([MPNowPlayingInfoCenter class])  {
         
-        NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:currentartitst,currenttitle,duration,[NSNumber numberWithInteger:numb],elapsed, nil]
-                                                                              forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyArtist,MPMediaItemPropertyTitle, MPMediaItemPropertyPlaybackDuration,MPNowPlayingInfoPropertyPlaybackRate,             MPNowPlayingInfoPropertyElapsedPlaybackTime,nil]];
+        NSDictionary *currentlyPlayingTrackInfo = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:currentartitst,currenttitle,duration,[NSNumber numberWithInteger:numb],elapsed,currenttracksrc, nil]
+                                                                              forKeys:[NSArray arrayWithObjects:MPMediaItemPropertyArtist,MPMediaItemPropertyTitle, MPMediaItemPropertyPlaybackDuration,MPNowPlayingInfoPropertyPlaybackRate,             MPNowPlayingInfoPropertyElapsedPlaybackTime,MPMediaItemPropertyArtwork,nil]];
         [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = currentlyPlayingTrackInfo;
     }
     
@@ -142,6 +144,41 @@ static NSNumber *currentDuration = 0;
     });
     
     
+}
+
+- (MPMediaItemArtwork *) createCoverArtwork: (NSString *) coverUri {
+    UIImage * coverImage = nil;
+    
+    if (coverUri == nil) {
+        return nil;
+    }
+    
+    if ([coverUri hasPrefix:@"http://"] || [coverUri hasPrefix:@"https://"]) {
+        NSURL * coverImageUrl = [NSURL URLWithString:coverUri];
+        NSData * coverImageData = [NSData dataWithContentsOfURL: coverImageUrl];
+        
+        coverImage = [UIImage imageWithData: coverImageData];
+    }
+    else if ([coverUri hasPrefix:@"file://"]) {
+        NSString * fullCoverImagePath = [coverUri stringByReplacingOccurrencesOfString:@"file://" withString:@""];
+        
+        if ([[NSFileManager defaultManager] fileExistsAtPath: fullCoverImagePath]) {
+            coverImage = [[UIImage alloc] initWithContentsOfFile: fullCoverImagePath];
+        }
+    }
+    else if (![coverUri isEqual:@""]) {
+        NSString * baseCoverImagePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString * fullCoverImagePath = [NSString stringWithFormat:@"%@%@", baseCoverImagePath, coverUri];
+        
+        if ([[NSFileManager defaultManager] fileExistsAtPath:fullCoverImagePath]) {
+            coverImage = [UIImage imageNamed:fullCoverImagePath];
+        }
+    }
+    else {
+        coverImage = [UIImage imageNamed:@"none"];
+    }
+    
+    return [self isCoverImageValid:coverImage] ? [[MPMediaItemArtwork alloc] initWithImage:coverImage] : nil;
 }
 
 
