@@ -18,7 +18,7 @@
 module.exports = {
   updateMetas: function(success, fail, params) {
     cordova.exec(success, fail, 'RemoteControls', 'updateMetas', params);
-    }
+    },
     
     receiveRemoteEvent:function(event) {
     var ev = document.createEvent('HTMLEvents');
